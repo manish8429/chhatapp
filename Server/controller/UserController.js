@@ -92,18 +92,20 @@ export const sendMessage = asyncHandler(async (req, res) => {
 
 export const getchatmassage = asyncHandler(async (req, res) => {
   try {
-    const { userId, selectedUserId } = req.params;
+    const { userId, receiverId } = req.params;
 
     const messages = await Message.find({
       $or: [
-        { sender: userId, receiver: selectedUserId },
-        { sender: selectedUserId, receiver: userId },
+        { sender: userId, receiver: receiverId },
+        { sender: receiverId, receiver: userId },
       ],
-    }).sort({ createdAt: 1 }); // Sort messages in ascending order
+    })
+      .sort({ createdAt: 1 }) // Ensure messages are in order
+      .populate("sender receiver", "name email"); // Optional: Populate user details
 
     res.status(200).json(messages);
   } catch (error) {
     console.error("Error fetching messages:", error);
-    res.status(500).json({ error: "Internal Server Error" });
+    res.status(500).json({ error: "Server error" });
   }
 });
